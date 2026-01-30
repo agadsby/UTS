@@ -6,7 +6,7 @@ The tape image used to build this system appears to be from a port of the
 V7 Research UNIX onto an IBM 370 mainframe environment around 1981.
 This version could only be installed and run under the IBM VM operating system as a guest OS.
 
-The tape forms part of the material provided on Moshix's GitHub [UTS](https://github.com/moshix/UTS). It
+The tape forms part of the material provided on https://github.com/moshix/UTS). It
 
 Once loaded the installation includes a runnable UTS system with all of the source code of both the kernel and utilities, the entire system is capable of rebuilding itself.
 
@@ -59,14 +59,14 @@ To interrupt the output, or a long running command, enter the **PA2** key - this
 After you have explored things you can shutdown VM370 by entering **SHUTDOWN** from the MAINT login userid OR by entering **/shutdown** at the Hercules system console **===>** prompt.
 
 ### Install UTS
-Download the UTS installation tape from https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 and unzip it into directory accessible from the VM370 installation, say **tapes/Amdahl_UTS2.aws**.
+The **tapes/** directory contains a download of the UTS installation tape from Moshix's GitHub [UTS Install Tape](https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 ). **unzip** it into directory accessible from the VM370 installation, say **tapes/Amdahl_UTS2.aws**.
 
-Create a new directory next to tapes, say **disks-uts/**,  enter the following command to create a couple of empty IBM 370 disk packs (initially we'll only use the first one):
+The **disks-uts/**" directory holds a couple of empty IBM 370 disk packs (initially we'll only use the first one), they can be re-created dynamically using:
 ```
 dasdinit64 -a -bz2 disks-uts/uts.150 3330 UTSSYS
 dasdinit64 -a -bz2 disks-uts/uts.151 3330 UTSUSR
 ```
-The supplied **conf/vm370uts.conf is derived from **vm370ce.conf** and adds the following two lines at the end of the file, as well as modifying the default card reader to be a socket listening on port 3505.
+The supplied **conf/vm370uts.conf is derived from **vm370ce.conf** and adds the following two lines at the end of the file, as well as modifying the default card reader to be a socket listening on port 3505 (you can use netcat or telnet to send cards directly to VM/370 and onto any guest Virtual Machine).
 ```
 # UTS disks : 150 is standard UTSSYS remainder are "spares"
 0150     3330    disks-uts/uts.150
