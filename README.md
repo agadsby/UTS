@@ -202,3 +202,20 @@ A few useful commands - remember this is an early V7 UNIX so things are strangel
 |opr -c A /usr/src/doc/out/beg	| Print the beginners guide NOTE: the printout will appear in the **VM370/io/** directory as one of the print listing files.|
 |logoff||
 |/etc/shutdown 0|Immediate (clean) shutdown|
+### SPECIAL CHARACTERS
+Because the 3270 keyboard, in the 1980s, had a limited character set, certain characters must be entered using special characters or character pairs.  These characters and character pairs, which would be used primarily in the develop-ment of C programs, are:
+
+|Sequence|Represents|
+|:--|:--|
+|          (<     |    left brace
+|          >)     |    right brace
+|          (|     |    left bracket
+|          |)     |    right bracket
+|          \      |    backslash
+|          ~      |    tilde
+|          \~     |    circumflex
+|         \<     |    grave accent
+|         \!     |    tab
+
+See **man stty* entries for **-idbl** and **-odbl**.
+
