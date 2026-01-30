@@ -209,13 +209,13 @@ Because the 3270 keyboard, in the 1980s, had a limited character set, certain ch
 |:--|:--|
 |          (<     |    left brace
 |          >)     |    right brace
-|          (|     |    left bracket
-|          |)     |    right bracket
+|          (\|     |    left bracket
+|          \|)     |    right bracket
 |          \      |    backslash
 |          ~      |    tilde
-|          \~     |    circumflex
-|         \<     |    grave accent
-|         \!     |    tab
+|          \\~     |    circumflex
+|         \\<     |    grave accent
+|         \\!     |    tab
 
 See **man stty* entries for **-idbl** and **-odbl**.
 
