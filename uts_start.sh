@@ -6,7 +6,7 @@
 # TOP="${VMHOME:-$HOME/VM}"
 # cd $TOP
 #
-configfile="conf/vm370uts.conf"
+configfile="uts/conf/vm370uts.conf"
 logfile="./log.txt"
 
 if [ -r ${logfile} ]; then
@@ -19,4 +19,7 @@ if [ -r ${configfile} ]; then
    else
 	hercules -f ${configfile} --logfile=${logfile}
    fi
+else
+   echo "$0: No config file found ${configfile}" >&2
+   exit 1
 fi

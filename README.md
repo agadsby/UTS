@@ -217,5 +217,5 @@ Because the 3270 keyboard, in the 1980s, had a limited character set, certain ch
 |         \\<     |    grave accent
 |         \\!     |    tab
 
-See **man stty* entries for **-idbl** and **-odbl**.
+See **man stty** entries for **-idbl** and **-odbl**.
 
