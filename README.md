@@ -2,34 +2,31 @@
 
 ## Background
 
-The tape image used to build this system appears to be from a port of the
+The tape image, from https://github.com/moshix/UTS appears to be from a port of the
 V7 Research UNIX onto an IBM 370 mainframe environment around 1981.
-This version could only be installed and run under the IBM VM operating system as a guest OS.
+This version can only be installed and run under the IBM VM operating system as a guest OS.
 
-The tape forms part of the material provided on https://github.com/moshix/UTS). It
+Once extracted the installation is a runnable UTS system with all of the source code for the kernel and utilities. The  system is complete in that it is capable of rebuilding itself.
 
-Once loaded the installation includes a runnable UTS system with all of the source code of both the kernel and utilities, the entire system is capable of rebuilding itself.
+The tape image is in IBM CMS format and contains two tape files:
 
-The tape image was obtained from [Moshix's UTS GitHub](https://github.com/moshix/UTS).
-It is in IBM CMS format and contains two tape files:
-
-1. CMS tape loadable file containing installation text, install file and sample VM configuration.
+1. CMS tape loadable file containing installation notes, install exec file and sample VM configuration.
 2. A DDR format tape file containing the complete UTS system.
 
 I believe this tape would be fully installable in a current IBM z/VM system, although I have not tried it (yet). It is, however, very easy to install, and run it on any system capable of supporting the [Hercules IBM 370 emulator](http://www.hercules-390.org/).
 
-The following page contains details of how to install, configure and operate, this system on a Raspberry Pi.
+The following page contains details of how to install, configure and operate.
 
 ## Prerequisites
 
 1. A platform capable of running the [Hercules IBM 370 emulator](http://www.hercules-390.org/).  Native versions are available for Windows and source code is available with a [Hercules helper](https://github.com/wrljet/hercules-helper/blob/master/README.md) tool to help the build process on other environments, such as LINUX, MacOs and Arm64.
 2. Around 1GB of disk space to  hold the VM370 and UTS disk volumes.
 3. A 3270 terminal emulator - on LINUX either c3270 or x3270 will work, on Windows wc3270 is included in VM/370 build below.
-4. It is worth reading up about how to enter the **Clear**, **Reset**, **PA1**, **PA2** and **Sys Req** keys on your 3270 emulator as these keys are critical for interacting with both VM and UTS.
+4. Understand how to enter the **Clear**, **Reset**, **PA1**, **PA2** and **Sys Req** keys on your 3270 emulator as these keys are critical for interacting with both VM and UTS.
 
 ## Installation Steps
 
-Here are the high level steps to get UTS installed and running.
+Here are the high level steps to get UTS installed and running. These instructions basically overlay the UTS installation on top of a pre-configured IBM VM370 Community Edition installation.
 
 ### Install Hercules
 
@@ -37,11 +34,12 @@ Either obtain a prebuilt [Windows](https://sdl-hercules-390.github.io/html/) ins
 
 ### Install VM/370
 
-Download the [Disk images for VM/370](https://www.vm370.org/VM/V1R1.2). Unpack the zip file into a "VM" directory - this directory  contains a fully installed and ready to run system. Use the **vm370ce.cmd** Windows or **vm370ce.sh**  Linux to boot the system.
+Download the [Disk images for VM/370](https://www.vm370.org/VM/V1R1.2). Unpack the zip file into a "VM" directory - this directory  now contains a fully installed and ready to run system. Use the supplied **vm370ce.cmd** Windows or **vm370ce.sh** Linux to boot the system.
 
 Connect to VM370 using a 3270 emulator - by default the commands above will start emulator session(s).
 Hit **Enter** to clear the VM370 splash screen and login using
-cp	 **LOGON MAINT** password **CPCMS**
+ **LOGON MAINT** password **CPCMS**
+ 
 A few useful commands:
 | Command | Notes|
 |:---------------|:-----|
@@ -50,32 +48,35 @@ A few useful commands:
 | TYPE USER DIRECT | display contents of file USER DIRECT|
 | Q RDR | show any files in your virtual reader|
 | Q DASD FREE | show unallocated disk packs|
+| SHUTDOWN | close VM down (quickly)|
+| LOGOFF | Log off from your "virtual machine"|
 
 At some point you will  get a
-**MORE...** message on the bottom right of the window - show the next screen  using the  **Clear** key. If you simply hit **Enter** the display will change to **HOLDING**,	move on using **Clear**.
+**MORE...** message on the bottom right of the window - show the next screen using the  **Clear** key. If you simply hit **Enter** the display will change to **HOLDING**,	move on using **Clear**.
 
 To interrupt the output, or a long running command, enter the **PA2** key - this will drop you back to the CMS command prompt. If you accidentally enter **PA1** this will "kill" CMS and you will get **CP READ** displayed. At this point you can either **LOGOFF** or reIPL CMS by entering **IPL CMS**.
 
 After you have explored things you can shutdown VM370 by entering **SHUTDOWN** from the MAINT login userid OR by entering **/shutdown** at the Hercules system console **===>** prompt.
 
 ### Install UTS
-The **tapes/** directory contains a download of the UTS installation tape from Moshix's GitHub [UTS Install Tape](https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 ). **unzip** it into directory accessible from the VM370 installation, say **tapes/Amdahl_UTS2.aws**.
+Overlay the **uts** directory and other helper files alongside the **disks** directory in your VM370 directory.
+The **uts/tapes/** directory contains a download of the UTS installation tape from Moshix's GitHub [UTS Install Tape](https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 ). **unzip** it in-situ to create **uts/tapes/Amdahl_UTS2.aws**.
 
-The **disks-uts/**" directory holds a couple of empty IBM 370 disk packs (initially we'll only use the first one), they can be re-created dynamically using:
+The **uts/disks/**" directory holds a couple of empty IBM 3330 disk packs (initially we'll only use the first one), they can be re-created dynamically using:
 ```
 dasdinit64 -a -bz2 disks-uts/uts.150 3330 UTSSYS
 dasdinit64 -a -bz2 disks-uts/uts.151 3330 UTSUSR
 ```
-The supplied **conf/vm370uts.conf is derived from **vm370ce.conf** and adds the following two lines at the end of the file, as well as modifying the default card reader to be a socket listening on port 3505 (you can use netcat or telnet to send cards directly to VM/370 and onto any guest Virtual Machine).
+The supplied **uts/conf/uts.conf** is derived from **vm370ce.conf** and adds the following two lines at the end of the file, as well as modifying the default card reader to be a socket listening on port 3505 (you can use netcat or telnet to send cards directly to VM/370 and onto any guest Virtual Machine).
 ```
 # UTS disks : 150 is standard UTSSYS remainder are "spares"
 0150     3330    disks-uts/uts.150
 0151     3330    disks-uts/uts.151
 ```
-Restart Hercules and these  disks will be attached to the VM370 configuration.
-If you login as MAINT/CPCMS you should see them listed if you do a **Q DASD FREE**.
+Start Hercules using **uts_start.sh** or ** uts_start.cmd**.
+If you login as MAINT/CPCMS you should see disks 150 and 151 listed if you do a **Q DASD FREE**.
 
-The file below, from **cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system.:
+The file below, from **uts/cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system.:
 ```
 USERID MAINT
 * 
@@ -166,19 +167,19 @@ To install UTS into the running VM370 system. Using a 3270 terminal login as MAI
 Return to the Hercules window and at the **herc ===>** prompt enter the following three lines one at a time:
 ```
 /START ALL
-devinit 00C adduts_exec.cards ascii eof trunc
-devinit 480 tapes/Amdahl_UTS2.aws" 
+devinit 00C uts/cards/adduts_exec.cards ascii eof trunc
+devinit 480 uts/tapes/Amdahl_UTS2.aws" 
 ```
-This will (i) start the virtual card reader (ii) read in your deck (iii) mount the tape ready for use by the installation script on the cards.
+This will (i) start the virtual card reader (ii) read in the deck and send it to MAINT user (iii) mount the tape ready for use by the installation script on the cards. As an alternative you can simply send the "cards" to port 3505 using **netcat**, or similar.
 
-Back to the 3270 MAINT window read in the card deck and if successful run the scipt by entering:
+On the 3270 MAINT window read in the card deck and if successful run the script by entering:
 ```
 READCARD ADDUTS EXEC
 ADDUTS
 ```
-You should then see a series of messages as the tape is read onto the UTS disk and UTS is created as a new Virtual Machine that will automatically be started the next time you restart VM370.
+You should then see a series of messages as the tape is read onto the UTS disk and UTS is created as a new Virtual Machine that will automatically be started the next time you start VM370.
 
-Shutdown VM370 and restart it. On the Hercules Window you should see a message like:
+Shutdown VM370 and restart it. In the Hercules Window you should see a message like:
 ```
 09:56:57 DASD 150 ATTACH TO SYSTEM UTSSYS BY AUTOLOG1                         
 09:56:57 AUTO LOGON   ***   UTS      USERS = 004  BY  AUTOLOG1  
@@ -187,7 +188,7 @@ This means UTS is up and running. Start a new 3270 session and enter
 ```DIAL UTS```
 You will get a cryptic
 ```Name: ```
-prompt. Login using **root** with password **root**, remember this is a 3270 terminal so entry is on the bottom line of the screen and you'll need to use **Clear** and **Reset** if you screen fills or locks. Use **Tab** to easily move the cursor to an "enterable field"
+prompt. Login using **root** with password **root**, remember this is a 3270 terminal so entry is on the bottom line of the screen and you'll need to use **Clear** and **Reset** if you screen fills or locks. Use **Tab** to easily move the cursor to an "enterable field".
 A few useful commands - remember this is an early V7 UNIX so things are strangely familiar, but different.....
 
 |Command|Notes|
