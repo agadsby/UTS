@@ -62,7 +62,7 @@ After you have explored things you can shutdown VM370 by entering **SHUTDOWN** f
 Overlay the **uts** directory and other helper files alongside the **disks** directory in your VM370 directory.
 The **uts/tapes/** directory contains a download of the UTS installation tape from Moshix's GitHub [UTS Install Tape](https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 ). **unzip** it in-situ to create **uts/tapes/Amdahl_UTS2.aws**.
 
-The **uts/disks/**" directory holds a couple of empty IBM 3330 [c. 100MB each] disk packs (initially we'll only use the first one), they can be re-created dynamically using:
+The **uts/disks/**" directory holds a couple of empty IBM 3330 [c. 100MB each] disk packs (initially we'll only use the first one), these can be re-created dynamically using:
 ```
 dasdinit64 -a -bz2 uts/disks/uts.150 3330 UTSSYS
 dasdinit64 -a -bz2 uts/disks/uts.151 3330 UTSUSR
@@ -219,4 +219,45 @@ Because the 3270 keyboard, in the 1980s, had a limited character set, certain ch
 |         \\!     |    tab
 
 See **man stty** entries for **-idbl** and **-odbl**.
+
+## UTS Operation
+
+### Tape Handling
+UTS can access "tape files" on the host. This is a useful way to get data into and out of UTS in **tar** format.
+
+In the **uts/tapes/** directory there is a **scratch.het** entry that was created using:
+```
+hetinit -d -n uts/tapes/scratch.het
+```
+This is a convenient empty "tape" that UTS can use.
+
+To mount this tape on a UTS terminal enter:
+```
+tape -w -m scratch
+```
+and in the Hercules window enter:
+```
+devinit 480 uts/tapes/scratch.het compress=0 awstape
+/attach 480 UTS 181
+```
+to link the host tape file to UTS as device **/dev/tape/scratch**.
+You can use tar to copy data to the tape.
+```
+tar cvf /dev/tape/scratch /usr/src 
+```
+You may wish to omit the v flag for large tar's as clearing the screen becomes tiresome!
+
+At this point you have file on the host containing te export BUT it contains "virtual tape blocks and marks" so it is necessary to process the file before **tar** can read it on the host. To do this use:
+```
+hetget -n scratch.het usr_src.tar 1 FB 4096 4096
+```
+where the arguments are:
+|Argument|Usage|
+|:--:|:---|
+|-n| not tape label|
+|usr_src.tar 1|file name & position on tape|
+|FB 4096 4096| Fixed Blocks 4K records|
+
+once completed the file usr_src.tar can be read using normal **tar**.
+
 
