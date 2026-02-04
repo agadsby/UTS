@@ -62,16 +62,16 @@ After you have explored things you can shutdown VM370 by entering **SHUTDOWN** f
 Overlay the **uts** directory and other helper files alongside the **disks** directory in your VM370 directory.
 The **uts/tapes/** directory contains a download of the UTS installation tape from Moshix's GitHub [UTS Install Tape](https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 ). **unzip** it in-situ to create **uts/tapes/Amdahl_UTS2.aws**.
 
-The **uts/disks/**" directory holds a couple of empty IBM 3330 disk packs (initially we'll only use the first one), they can be re-created dynamically using:
+The **uts/disks/**" directory holds a couple of empty IBM 3330 [c. 100MB each] disk packs (initially we'll only use the first one), they can be re-created dynamically using:
 ```
-dasdinit64 -a -bz2 disks-uts/uts.150 3330 UTSSYS
-dasdinit64 -a -bz2 disks-uts/uts.151 3330 UTSUSR
+dasdinit64 -a -bz2 uts/disks/uts.150 3330 UTSSYS
+dasdinit64 -a -bz2 uts/disks/uts.151 3330 UTSUSR
 ```
 The supplied **uts/conf/uts.conf** is derived from **vm370ce.conf** and adds the following two lines at the end of the file, as well as modifying the default card reader to be a socket listening on port 3505 (you can use netcat or telnet to send cards directly to VM/370 and onto any guest Virtual Machine).
 ```
 # UTS disks : 150 is standard UTSSYS remainder are "spares"
-0150     3330    disks-uts/uts.150
-0151     3330    disks-uts/uts.151
+0150     3330    uts/disks/uts.150
+0151     3330    uts/disks/uts.151
 ```
 Start Hercules using **uts_start.sh** or ** uts_start.cmd**.
 If you login as MAINT/CPCMS you should see disks 150 and 151 listed if you do a **Q DASD FREE**.
