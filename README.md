@@ -62,19 +62,19 @@ After you have explored things you can shutdown VM370 by entering **SHUTDOWN** f
 Overlay the **uts** directory and other helper files alongside the **disks** directory in your VM370 directory.
 The **uts/tapes/** directory contains a download of the UTS installation tape from Moshix's GitHub [UTS Install Tape](https://github.com/moshix/UTS/blob/main/Amdahl_UTS2.aws.bz2 ). **unzip** it in-situ to create **uts/tapes/Amdahl_UTS2.aws**.
 
-The **uts/disks/**" directory holds a couple of empty IBM 3330 [c. 100MB each] disk packs (initially we'll only use the first one), these can be re-created dynamically using:
+The **uts/disks/**" directory holds a couple of empty IBM disk packs (initially we'll only use the first one), these can be re-created dynamically using:
 ```
-dasdinit64 -a -bz2 uts/disks/uts.150 3330 UTSSYS
-dasdinit64 -a -bz2 uts/disks/uts.151 3330 UTSUSR
+dasdinit64 -bz2 uts/disks/uts.150.cckd 3330 UTSSYS
+dasdinit64 -bz2 uts/disks/uts.151.cckd 3350 UTSUSR
 ```
-The supplied **uts/conf/uts.conf** is derived from **vm370ce.conf** and adds the following two lines at the end of the file, as well as modifying the default card reader to be a socket listening on port 3505 (you can use netcat or telnet to send cards directly to VM/370 and onto any guest Virtual Machine).
+The supplied **uts/conf/uts.conf** is derived from **vm370ce.conf** adding the following lines at the end of the file and modifies the default card reader to be a socket listening on port 3505 (you can use netcat or telnet to send cards directly to VM/370 and onto any guest Virtual Machine).
 ```
 # UTS disks : 150 is standard UTSSYS remainder are "spares"
-0150     3330    uts/disks/uts.150
-0151     3330    uts/disks/uts.151
+0150     3330    uts/disks/uts.150.cckd
+0151     3350    uts/disks/uts.151.cckd
 ```
-Start Hercules using **uts_start.sh** or ** uts_start.cmd**.
-If you login as MAINT/CPCMS you should see disks 150 and 151 listed if you do a **Q DASD FREE**.
+Start Hercules using **uts_start.sh** or **uts_start.cmd**.
+If you logon as MAINT/CPCMS you should see disks 150 and 151 listed if you do a **Q DASD FREE**.
 
 The file below, from **uts/cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system.:
 ```
@@ -131,7 +131,7 @@ MDISK 110 3330 101 050 UTSSYS WR AMDAHL AMDAHL
 MDISK 220 3330 151 060 UTSSYS WR AMDAHL AMDAHL
 MDISK 330 3330 211 160 UTSSYS WR AMDAHL AMDAHL
 MDISK 660 3330 371 030 UTSSYS WR AMDAHL AMDAHL
-MDISK 770 3330 001 403 UTSUSR WR AMDAHL AMDAHL
+MDISK 770 3350 001 554 UTSUSR WR AMDAHL AMDAHL
 &END
 &STACK
 &STACK SAVE
@@ -254,8 +254,8 @@ hetget -n scratch.het usr_src.tar 1 FB 4096 4096
 where the arguments are:
 |Argument|Usage|
 |:--:|:---|
-|-n| not tape label|
-|usr_src.tar 1|file name & position on tape|
+|-n| no tape label|
+|usr_src.tar 1|output file & position on tape|
 |FB 4096 4096| Fixed Blocks 4K records|
 
 once completed the file usr_src.tar can be read using normal **tar**.
