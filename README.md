@@ -140,7 +140,7 @@ Because the 3270 keyboard, in the 1980s, had a limited character set, certain ch
 
 See **man stty** entries for **-idbl** and **-odbl**.
 
-## UTS Operation
+## UTS Operations	
 
 ### Tape Handling
 UTS can access "tape files" on the host. This is a useful way to get data into and out of UTS in **tar** format.
@@ -161,13 +161,14 @@ devinit 480 uts/tapes/scratch.het compress=0 awstape
 /attach 480 UTS 181
 ```
 to link the host tape file to UTS as device **/dev/tape/scratch**.
-You can use tar to copy data to the tape.
+
+You can now use tar to copy data to the tape.
 ```
 tar cvf /dev/tape/scratch /usr/src 
 ```
 You may wish to omit the v flag for large tar's as clearing the screen becomes tiresome!
 
-At this point you have file on the host containing te export BUT it contains "virtual tape blocks and marks" so it is necessary to process the file before **tar** can read it on the host. To do this use:
+At this point you have a file on the host containing the exported data BUT it contains "virtual tape blocks and marks" so it is necessary to process the file before **tar** can read it on the host. To do this use:
 ```
 hetget -n scratch.het usr_src.tar 1 FB 4096 4096
 ```
