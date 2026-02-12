@@ -76,91 +76,8 @@ The supplied **uts/conf/uts.conf** is derived from **vm370ce.conf** adding the f
 Start Hercules using **uts_start.sh** or **uts_start.cmd**.
 If you logon as MAINT/CPCMS you should see disks 150 and 151 listed if you do a **Q DASD FREE**.
 
-The file below, from **uts/cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system.:
-```
-USERID MAINT
-* 
-* The line above sends the card deck to the MAINT user
-*
-&CONTROL ERROR
+The file **uts/cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system. In simple terms it reads in the second file from tape mounted on device 0480 onto the disk mounted at 0150, it then creates a DIRECTORY entry for a UTS Virtual Machine and sets things up so that the VM autostarts when VM370 starts.
 
-&TYPE Loading UTS tape and disk
-CP ATTACH 480 TO MAINT AS 181
-CP ATTACH 150 TO MAINT
-TAPE LOAD
-
-&IF &RETCODE EQ 0 &GOTO -G1
-&TYPE "Load of install tape file 1 failed"
-&EXIT 4
-******
--G1
-&TYPE INSTALL EXEC ready, extracting
-EXEC INSTALL
-&IF &RETCODE EQ 0 &GOTO -G2
-&TYPE "DDR EXTRACT OF TAPE FILE 2 FAILED"
-&EXIT 4
-******
--G2
-&TYPE UTS DASD loaded
-CP DET 150
-CP DET 181
-******
-
-&TYPE Adding UTS user to directory
-COPY USER DIRECT A SAVE DIRECT A
-******
-*NB: The UTS Install tape includes a sample UTS DIRECT entry
-*    we don't use that as it needs some customisation.
-*    MDISK 770 to allow additional volume to be added later
-******
-&STACK BOTTOM
-&STACK INPUT
-&BEGSTACK
-
-USER UTS AMDAHL 6M 6M G
-IPL 220
-OPTION ECMODE REALTIMER BMX
-CONSOLE 009 3215
-SPOOL 00C 2540 READER A
-SPOOL 00D 2540 PUNCH A
-SPOOL 00E 1403 A
-MDISK 150 3330 0   404 UTSSYS WR AMDAHL AMDAHL
-MDISK DD0 3330 001 050 UTSSYS WR AMDAHL AMDHAL
-MDISK 550 3330 051 050 UTSSYS WR AMDAHL AMDAHL
-MDISK 110 3330 101 050 UTSSYS WR AMDAHL AMDAHL
-MDISK 220 3330 151 060 UTSSYS WR AMDAHL AMDAHL
-MDISK 330 3330 211 160 UTSSYS WR AMDAHL AMDAHL
-MDISK 660 3330 371 030 UTSSYS WR AMDAHL AMDAHL
-MDISK 770 3350 001 554 UTSUSR WR AMDAHL AMDAHL
-&END
-&STACK
-&STACK SAVE
-&STACK QUIT
-EDIT USER DIRECT A (NODISP
-DIRECT USER
-******
-&TYPE Updating AUTOLOGIN to add UTS
-CP LINK AUTOLOG1 191 397 MR MULT
-CP ATTACH 150 TO SYSTEM AS UTSSYS
-ACCESS 397 Z
-COPY PROFILE EXEC Z PROFILE BACKUP Z
-******
-&TYPE Editing PROFILE EXEC
-&STACK TOP
-&STACK LOCATE CP SET PRIOR
-&STACK INPUT
-&STACK * UTS VM 
-&STACK CP ATTACH 150 TO SYSTEM AS UTSSYS	
-&STACK CP AUTOLOG UTS AMDAHL AUTOUTS
-&STACK
-&STACK SAVE
-&STACK QUIT
-EDIT PROFILE EXEC Z (NODISP
-******
-&TYPE All done
-&TYPE After VM370 RESTART connect using DIAL UTS
-&EXIT 0
-```
 
 To install UTS into the running VM370 system. Using a 3270 terminal login as MAINT/CPCMS
 
@@ -208,15 +125,18 @@ Because the 3270 keyboard, in the 1980s, had a limited character set, certain ch
 
 |Sequence|Represents|
 |:--|:--|
-|          (<     |    left brace
-|          >)     |    right brace
-|          (\|     |    left bracket
-|          \|)     |    right bracket
-|          \      |    backslash
-|          ~      |    tilde
-|          \\~     |    circumflex
-|         \\<     |    grave accent
-|         \\!     |    tab
+|          (<   |    left brace
+|          >)   |    right brace
+|          (\   |    left bracket
+|          \|   |    right bracket
+|           ¢   |    backslash
+|          ¬    |    tilde
+|          ¢¬   |    circumflex
+|         ¢<    |    grave accent
+|         ¢!    |    tab
+|	PA1	|	Ctrl-C (interrupt)
+|	PA2	|	Ctrl-\ (quit)
+|	Sys Req	| 	Ctrl-D (EOT)
 
 See **man stty** entries for **-idbl** and **-odbl**.
 
