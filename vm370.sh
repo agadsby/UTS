@@ -1,0 +1,122 @@
+#!/bin/bash
+#
+# Driver script for handling VM370.... subfunctions do the work
+#
+
+TOP="${VM370HOME:-$PWD}"
+cd $TOP
+
+#
+PORT=8081
+VMHOST=localhost
+RDRPORT=3505
+CONSOLE=/cgi-bin/tasks/syslog
+TAPE=uts/tapes/Amdahl_UTS2.aws	
+
+help() {
+	echo $0 ' [ cmd | confuts | rdr ] {args....}'
+	exit 1
+}
+
+# 
+# helper function to send command to Hercules console
+#
+herccmd() {
+	CMD=$@
+	status=`curl --data-urlencode "command=$CMD" --data-urlencode "send=send" \
+		-o /dev/null -s -w '%{http_code}\n' http://$VMHOST:$PORT$CONSOLE`
+	if [ "$status" -ne "200" ]; then
+		if [ "$status" -eq "000" ]; then
+			echo "$0: No connection to host" >&2
+		else
+			echo "$0: Command error - status $status" >&2
+		fi
+		exit 1
+	fi
+
+
+}
+
+#
+# helper function to send card deck to VM RDR
+#
+vmrdr() {
+	FILE=$1
+	if [ ! -f $FILE -o ! -r $FILE ] ; then
+		echo "$0: $FILE not readable" >&2
+		exit 1
+	fi
+	nc $VMHOST $RDRPORT <$FILE
+	if [ $? -ne 0 ] ; then
+		echo "$0: Failed to send $FILE to $VMHOST:$RDRPORT" >&2
+		exit 1
+	fi
+}
+
+# auto config process for UTS
+
+confuts() {
+	
+
+	if [ ! -f $TAPE ]; then
+		if [ -f $TAPE.bz2 ]; then
+			echo "Unzipping Install Tape"
+			bunzip2 -q $TAPE.bz2
+			chmod ugo-w $TAPE
+		else
+			echo "No UTS installation tape $TAPE or $TAPE.bz2"
+			exit 1
+		fi
+	fi
+	echo "Start VM370 using another session"
+	echo -n "Hit <Enter> when done : "
+	read line
+
+	echo "Enabling spool devices on VM370"
+	herccmd "/start all"
+	sleep 1
+
+	echo "Send UTS Config Cards to MAINT via RDR"
+	vmrdr cards/adduts_exec.cards
+	sleep 1
+
+	echo "Loading UTS installation tape on 0480"
+	herccmd devinit 0480 uts/tapes/Amdahl_UTS2.aws noring
+	sleep 1
+
+	cat <<! 
+Using a 3270 window
+LOGON MAINT CPCMS
+READCARD ADDUTS EXEC
+ADDUTS
+
+Once succesfully restarted use another 3270 window to DIAL UTS
+login using root / root
+!
+}
+
+if [ $# -lt 2 ]; then
+	help
+fi
+
+cmd=$i
+shift
+
+case $cmd in
+	rdr)	
+		vmrdr $@ 
+		;;
+
+	cmd)	
+		hercmd $@
+		;;
+
+	confuts)
+		confuts $@
+		;;
+	*)
+		help
+		;;
+esac
+
+
