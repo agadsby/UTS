@@ -34,7 +34,7 @@ Either obtain a prebuilt [Windows](https://sdl-hercules-390.github.io/html/) ins
 
 ### Install VM/370
 
-Download the [Disk images for VM/370](https://www.vm370.org/VM/V1R1.2). Unpack the zip file into a "VM" directory - this directory  now contains a fully installed and ready to run system. Use the supplied **vm370ce.cmd** Windows or **vm370ce.sh** Linux to boot the system.
+Download the [Disk images for VM/370](https://www.vm370.org/VM/V1R1.2). Unpack the zip file into a "VM370" directory - this directory  now contains a fully installed and ready to run system. Use the supplied **vm370ce.cmd** Windows or **vm370ce.sh** Linux to boot the system.
 
 Connect to VM370 using a 3270 emulator - by default the commands above will start emulator session(s).
 Hit **Enter** to clear the VM370 splash screen and login using
@@ -76,10 +76,9 @@ The supplied **uts/conf/uts.conf** is derived from **vm370ce.conf** adding the f
 Start Hercules using **uts_start.sh** or **uts_start.cmd**.
 If you logon as MAINT/CPCMS you should see disks 150 and 151 listed if you do a **Q DASD FREE**.
 
-The file **uts/cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system. In simple terms it reads in the second file from tape mounted on device 0480 onto the disk mounted at 0150, it then creates a DIRECTORY entry for a UTS Virtual Machine and sets things up so that the VM autostarts when VM370 starts.
+The file **uts/cards/adduts_exec.cards**, contains a sample CMS EXEC script that performs the installation of UTS from the tape, on your LINUX/Windows system. In simple terms it (i) reads in the second file from tape mounted on device 0480 onto the disk mounted at 0150, (ii) creates a DIRECTORY entry for a UTS Virtual Machine and (iii) sets things up so that the UTS VM autostarts when VM370 starts.
 
-
-To install UTS into the running VM370 system. Using a 3270 terminal login as MAINT/CPCMS
+To install UTS into the running VM370 system. Open a 3270 terminal and login as MAINT/CPCMS
 
 Return to the Hercules window and at the **herc ===>** prompt enter the following three lines one at a time:
 ```
@@ -94,18 +93,22 @@ On the 3270 MAINT window read in the card deck and if successful run the script 
 READCARD ADDUTS EXEC
 ADDUTS
 ```
-You should then see a series of messages as the tape is read onto the UTS disk and UTS is created as a new Virtual Machine that will automatically be started the next time you start VM370.
+You should see a series of messages as the tape is read onto the 150 disk and UTS is created as a new Virtual Machine that will automatically be started the next time you start VM370.
 
-Shutdown VM370 and restart it. In the Hercules Window you should see a message like:
+Restart VM370, in the Hercules Window you should see a message like:
 ```
 09:56:57 DASD 150 ATTACH TO SYSTEM UTSSYS BY AUTOLOG1                         
 09:56:57 AUTO LOGON   ***   UTS      USERS = 004  BY  AUTOLOG1  
 ```
-This means UTS is up and running. Start a new 3270 session and enter
+This means UTS is up and running. 
+## UTS Operations
+### Login to UTS
+Start a new 3270 terminal session and enter
 ```DIAL UTS```
 You will get a cryptic
 ```Name: ```
 prompt. Login using **root** with password **root**, remember this is a 3270 terminal so entry is on the bottom line of the screen and you'll need to use **Clear** and **Reset** if you screen fills or locks. Use **Tab** to easily move the cursor to an "enterable field".
+
 A few useful commands - remember this is an early V7 UNIX so things are strangely familiar, but different.....
 
 |Command|Notes|
@@ -115,7 +118,7 @@ A few useful commands - remember this is an early V7 UNIX so things are strangel
 |ls 	| not multi-column|
 |ps -al |
 |xd|Hex dump (like od!)|
-|man ned/shutdown |man uses uses the 3270 **ned** editor - PF3 to Quit, PF7 forward  screen PF8 back screen
+|man ned |man uses uses the 3270 **ned** editor - PF3 to Quit, PF7 forward  screen PF8 back screen
 |/etc/cpcmd start all| Issue command to VM370 to start printers etc.
 |opr -c A /usr/src/doc/out/beg	| Print the beginners guide NOTE: the printout will appear in the **VM370/io/** directory as one of the print listing files.|
 |logoff||
@@ -138,9 +141,7 @@ Because the 3270 keyboard, in the 1980s, had a limited character set, certain ch
 |	PA2	|	Ctrl-\ (quit)
 |	Sys Req	| 	Ctrl-D (EOT)
 
-See **man stty** entries for **-idbl** and **-odbl**.
-
-## UTS Operations	
+See **man stty** entries for **-idbl** and **-odbl**.	
 
 ### Tape Handling
 UTS can access "tape files" on the host. This is a useful way to get data into and out of UTS in **tar** format.
@@ -176,9 +177,7 @@ where the arguments are:
 |Argument|Usage|
 |:--:|:---|
 |-n| no tape label|
-|usr_src.tar 1|output file & position on tape|
+|usr_src.tar 1|output file name & position on tape|
 |FB 4096 4096| Fixed Blocks 4K records|
 
-once completed the file usr_src.tar can be read using normal **tar**.
-
-
+usr_src.tar can now be read using normal host **tar**.
