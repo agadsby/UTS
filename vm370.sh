@@ -61,7 +61,7 @@ confuts() {
 	if [ ! -f $TAPE ]; then
 		if [ -f $TAPE.bz2 ]; then
 			echo "Unzipping Install Tape"
-			bunzip2 -q $TAPE.bz2
+			#bunzip2 -q $TAPE.bz2
 			chmod ugo-w $TAPE
 		else
 			echo "No UTS installation tape $TAPE or $TAPE.bz2"
@@ -95,11 +95,11 @@ login using root / root
 !
 }
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
 	help
 fi
 
-cmd=$i
+cmd=$1
 shift
 
 case $cmd in
